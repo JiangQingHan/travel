@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Data Display</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        .sidebar {
+            width: 200px;
+            height: 100vh;
+            background-color: #f2f2f2;
+            position: fixed; /* 将导航栏固定定位 */
+            top: 0; /* 从顶部开始固定 */
+            left: 0; /* 从左侧开始固定 */
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .sidebar li:hover {
+            background-color: #e6e6e6;
+        }
+        .table th,
+        .table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .table tbody tr:hover {
+            background-color: #e6e6e6;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container h1 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <ul>
+        <li onclick="loadPage('user')">User</li>
+        <li onclick="loadPage('order')">Order</li>
+    </ul>
+</div>
+
+<div id="content" class="container">
+    <h1>User</h1>
+    <table id="userTable" class="table">
+        <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Phone Number</th>
+            <th>Password</th>
+            <th>Username</th>
+            <th>Gender</th>
+            <th>Birthday</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <table id="orderTable" class="table">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Room ID</th>
+            <th>User ID</th>
+            <th>Rating</th>
+            <th>Time</th>
+            <th>Price</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+        // 默认加载用户表
+        loadPage('user');
+    });
+
+    function loadPage(page) {
+        // 清空表格内容
+        $("#userTable tbody").empty();
+        $("#orderTable tbody").empty();
+
+        if (page === 'user') {
+            // 发送 AJAX 请求获取用户列表
+            $.ajax({
+                url: "/select1",
+                method: "GET",
+                dataType: "json",
+                success: function(response) {
+                    $("#orderTable").hide();
+                    $("#userTable").show();
+                    if (response && response.length > 0) {
+                        var users = response;
+                        // 遍历用户列表，格式化生日信息并构建表格内容
+                        var tableBody = $("#userTable tbody");
+                        for (var i = 0; i < users.length; i++) {
+                            var user = users[i];
+                            var formattedBirthday = moment(user.birthday).format("YYYY-MM-DD");
+                            var row = "<tr>" +
+                                "<td>" + user.userId + "</td>" +
+                                "<td>" + user.phoneNumber + "</td>" +
+                                "<td>" + user.password + "</td>" +
+                                "<td>" + user.username + "</td>" +
+                                "<td>" + user.gender + "</td>" +
+                                "<td>" + formattedBirthday + "</td>" +
+                                "<td class='table-actions'>" +
+                                "<button onclick='editUser(" + user.userId + ")'>Edit</button>" +
+                                "<button onclick='deleteUser(" + user.userId + ")'>Delete</button>" +
+                                "</td>" +
+                                "</tr>";
+                            tableBody.append(row);
+                        }
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        } else if (page === 'order') {
+            // 发送 AJAX 请求获取订单列表
+            $.ajax({
+                url: "/select2",
+                method: "GET",
+                dataType: "json",
+                success: function(response) {
+                    $("#orderTable").show();
+                    $("#userTable").hide();
+                    if (response && response.length > 0) {
+                        var orders = response;
+                        // 遍历订单列表，格式化日期信息并构建表格内容
+                        var tableBody = $("#orderTable tbody");
+                        for (var i = 0; i < orders.length; i++) {
+                            var order = orders[i];
+                            var formattedDate = moment(order.time).format("YYYY-MM-DD");
+                            var row = "<tr>" +
+                                "<td>" + order.orderId + "</td>" +
+                                "<td>" + order.roomId + "</td>" +
+                                "<td>" + order.userId + "</td>" +
+                                "<td>" + order.rating + "</td>" +
+                                "<td>" + formattedDate + "</td>" +
+                                "<td>" + order.price + "</td>" +
+                                "<td class='table-actions'>" +
+                                "<button onclick='editOrder(" + order.orderId + ")'>Edit</button>" +
+                                "<button onclick='deleteOrder(" + order.orderId + ")'>Delete</button>" +
+                                "</td>" +
+                                "</tr>";
+
+                            tableBody.append(row);
+                        }
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        // 更新页面标题
+        $("#content h1").text(page);
+    }
+
+    function editUser(userId) {
+        // 编辑用户逻辑
+        console.log("Edit User: " + userId);
+    }
+
+    function deleteUser(userId) {
+        // 删除用户逻辑
+        console.log("Delete User: " + userId);
+    }
+
+    function editOrder(orderId) {
+        // 编辑订单逻辑
+        console.log("Edit Order: " + orderId);
+    }
+
+    function deleteOrder(orderId) {
+        // 删除订单逻辑
+        console.log("Delete Order: " + orderId);
+    }
+</script>
+</body>
+</html>
