@@ -1,0 +1,11 @@
+server:
+  port: 8014
+spring:
+  application:
+    name: demo
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://47.120.4.228:3306/WeTravel
+    username: 'doom'
+    password: '123qwe!@#QWE'
+
